@@ -1,0 +1,15 @@
+FRITZIP=http://fritz.box
+FRITZUSER=admin
+FRITZPWD=admin
+IFACE="1-lan"
+LOCALNETS="192.168.0.0/24,192.168.1.0/24"
+INSTANCE_NAME="docker"
+NTOPNG_PORT=80
+# IGNORE_HOSTS="not ip host 192.168.0.254 and not ip host 192.168.1.254"
+
+MYSQL_DATABASE="fritzdump"
+MYSQL_USER="ntopng"
+MYSQL_PASSWORD="ntopng"
+MYSQL_ROOT_PASSWORD="changeme, dummy!"
+
+
