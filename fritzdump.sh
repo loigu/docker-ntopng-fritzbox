@@ -34,9 +34,8 @@ fi
 
 echo "Trying to login into $FRITZIP as user $FRITZUSER"
 
-
 # Request challenge token from Fritz!Box
-CHALLENGE=$(curl -k -s $FRITZIP/login_sid.lua |  grep -o "<Challenge>[a-z0-9]\{8\}" | cut -d'>' -f 2)
+CHALLENGE=$(curl -sk $FRITZIP/login_sid.lua |  grep -o "<Challenge>[a-z0-9]\{8\}" | cut -d'>' -f 2)
 
 # Very proprieatry way of AVM: Create a authentication token by hashing challenge token with password
 HASH=$(perl -MPOSIX -e '
@@ -46,20 +45,20 @@ HASH=$(perl -MPOSIX -e '
     my $md5 = lc(md5_hex($ch_Pw));
     print $md5;
   ' -- "$CHALLENGE" "$FRITZPWD")
-  
-# TODO: can we use wget here?
-SID="$(curl -k -s "$FRITZIP/login_sid.lua" -d "response=$CHALLENGE-$HASH" -d 'username='${FRITZUSER} 2>/dev/null | grep -o "<SID>[a-z0-9]\{16\}" | cut -d'>' -f 2)"
+
+SID="$(curl -sk "$FRITZIP/login_sid.lua" -d "response=$CHALLENGE-$HASH" -d 'username='${FRITZUSER} 2>/dev/null | grep -o "<SID>[a-z0-9]\{16\}" | cut -d'>' -f 2)"
 
 # Check for successfull authentification
 if [[ $SID =~ ^0+$ ]] ; then echo "Login failed. Did you create & use explicit Fritz!Box users?" ; exit 1 ; fi
 
+echo "Got SID ${SID} ..."
 echo "Capturing traffic on Fritz!Box interface $IFACE ..." 1>&2
+echo "Using: $(ntopng --version)"
 
 DATADIR="$(dirname $0)/data/ntopng-$IFACE.data"
 [ ! -d "${DATADIR}" ] && mkdir -p "${DATADIR}"
 
 # TODO: trap seems not to work :-(
 trap "echo TRAPed signal" HUP INT QUIT TERM
-wget --no-check-certificate -qO- $FRITZIP/cgi-bin/capture_notimeout?ifaceorminor=$IFACE\&snaplen=\&capture=Start\&sid=$SID  |\
-    ntopng -U ntopng -i - -n 1 -w "${NTOPNG_PORT}" -W 0 -n 1 -d "${NTOPNG_DATA}" ${EXTRA}
-
+curl -sk -o - $FRITZIP/cgi-bin/capture_notimeout?ifaceorminor=$IFACE\&snaplen=\&capture=Start\&sid=$SID |\
+     ntopng -U ntopng -i - -n 1 -w "${NTOPNG_PORT}" -W 0 -n 1 -d "${NTOPNG_DATA}" ${EXTRA} --community
