@@ -12,3 +12,6 @@ docker run -dit --name fritz --env-file fritzdump.conf -p 80:8000 sbs:ntopng-fri
 
 **enjoy:**
 chromium-browser http://localhost:8000
+
+**NOTE:**
+Fritzbox is not capable of going full-speed when capture is running . We got 1000mbps connection, runs accordingly without capture. As soon as I start the trace the internet speed drops to 20Mb/s...
