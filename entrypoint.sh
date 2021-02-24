@@ -9,7 +9,7 @@ MYSQLD_PIDFILE=/var/run/mysqld/mysqld.pid
 gosu mysql /mariadb-entrypoint.sh prepare mysqld
 
 # start services in background here
-/etc/init.d/redis-server start 
+/etc/init.d/redis-server start
 start-stop-daemon --start -b --quiet --oknodo --pidfile "${MYSQLD_PIDFILE}" --chuid mysql:mysql --exec /mariadb-entrypoint.sh -- mysqld
 
 # run the main thing TODO: trap seems not to work :-(
